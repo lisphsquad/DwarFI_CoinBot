@@ -8,26 +8,28 @@
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
-            background-image: url('background.jpg'); /* Убедитесь, что путь к изображению правильный */
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
+            background-image: url('background.jpg'); /* Фон */
+            background-size: cover; /* Растягивание на весь экран */
+            background-repeat: no-repeat; /* Изображение не повторяется */
+            background-position: center; /* Центровка фона */
             margin: 0;
             padding: 20px;
             text-align: center;
         }
+
         .container {
             margin: 20px auto;
             width: 90%;
             max-width: 600px;
-            background-color: rgba(255, 255, 255, 0.8); /* Прозрачный белый фон контейнера */
+            background-color: rgba(255, 255, 255, 0.8); /* Легкая прозрачность для контейнера */
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Тень для контейнера */
         }
+
         .gnome {
             margin-bottom: 20px;
         }
+
         .energy-bar {
             width: 100%;
             height: 30px;
@@ -36,6 +38,7 @@
             border-radius: 10px;
             position: relative;
         }
+
         .energy-bar-inner {
             height: 100%;
             width: 100%;
@@ -43,68 +46,64 @@
             border-radius: 10px;
             transition: width 0.5s ease;
         }
+
         .stats {
             margin-bottom: 20px;
         }
-        #coins {
+
+        #coins, #emeralds {
             font-size: 24px;
             font-weight: bold;
         }
-        #emeralds {
-            font-size: 24px;
-            font-weight: bold;
-            color: green;
-        }
+
         #message {
             color: red;
             margin-top: 10px;
         }
+
         #restButton {
-            display: none;
+            display: none; /* Скрыть кнопку отдыха по умолчанию */
         }
-        /* Всплывающее окно */
-        .modal-overlay {
+
+        /* Стили для модального окна */
+        #modalOverlay {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
         }
-        .modal {
+
+        #store {
+            display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: white;
+            width: 300px;
+            background-color: #fff;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            display: none; /* Скрыть по умолчанию */
+            z-index: 1001;
         }
-        .modal button {
-            margin: 10px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
+
+        .store-item {
+            margin-bottom: 20px;
         }
-        .open-store-button {
+
+        .close-btn {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: #4caf50;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            background-color: red;
             color: white;
             border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
+            padding: 5px 10px;
             border-radius: 5px;
-        }
-        .open-store-button:hover {
-            background-color: #45a049;
         }
     </style>
 </head>
@@ -120,22 +119,27 @@
             <h3>Монеты: <span id="coins">0.00</span></h3>
             <h3>Изумруды: <span id="emeralds">0</span></h3>
             <h4>Энергия: <span id="energy">100</span>/100</h4>
-            <h4>Монеты в час: <span id="coinsPerHour">0.00</span></h4>
+            <h4>Добыча монет в час: <span id="coins-per-hour">0</span></h4>
         </div>
         <button id="mineButton" onclick="startMining()">Майнить золото</button>
         <button id="restButton" onclick="rest()">Отдых</button>
+        <button onclick="openStore()">Хранилище</button>
         <div id="message"></div>
+    </div>
 
-        <!-- Кнопка открытия хранилища -->
-        <button class="open-store-button" onclick="openStore()">Открыть хранилище</button>
-
-        <!-- Всплывающее окно хранилища -->
-        <div class="modal-overlay" id="modalOverlay" onclick="closeStore()"></div>
-        <div class="modal" id="store">
-            <h3>Хранилище</h3>
-            <button onclick="exchangeCoins()">Обменять 100 монет на 1 изумруд</button>
-            <button onclick="upgradePickaxe()">Улучшить кирку (100 монет)</button>
-            <button onclick="closeStore()">Закрыть</button>
+    <!-- Модальное окно хранилища -->
+    <div id="modalOverlay"></div>
+    <div id="store">
+        <button class="close-btn" onclick="closeStore()">X</button>
+        <div class="store-item">
+            <h4>Обмен монет на изумруды</h4>
+            <p>100 монет = 1 изумруд</p>
+            <button onclick="exchangeCoinsForEmeralds()">Обменять</button>
+        </div>
+        <div class="store-item">
+            <h4>Улучшить кирку</h4>
+            <p>Стоимость: <span id="pickaxeUpgradeCost">500 монет</span></p>
+            <button onclick="upgradePickaxe()">Улучшить</button>
         </div>
     </div>
 
@@ -143,30 +147,22 @@
         let coins = 0.00;
         let emeralds = 0;
         let energy = 100;
+        let coinsPerHour = 0.5; // Например, 0.5 монет в час
         let mining = false;
-        let miningInterval = null;
-        let restInterval = null;
         let pickaxeLevel = 1;
+        let pickaxeUpgradeCost = 500;
+
         const maxEnergy = 100;
-        const coinsPerSecond = 0.0046296296296296;
-        let coinsPerHour = 0;
 
         function updateUI() {
             document.getElementById('coins').innerText = coins.toFixed(2);
             document.getElementById('emeralds').innerText = emeralds;
             document.getElementById('energy').innerText = Math.floor(energy);
             document.getElementById('energy-bar').style.width = energy + '%';
-            document.getElementById('coinsPerHour').innerText = (coinsPerSecond * 3600 * pickaxeLevel).toFixed(2);
+            document.getElementById('coins-per-hour').innerText = coinsPerHour.toFixed(2);
+            document.getElementById('pickaxeUpgradeCost').innerText = pickaxeUpgradeCost + " монет";
             document.getElementById('mineButton').disabled = energy <= 0;
             document.getElementById('restButton').disabled = energy >= maxEnergy;
-        }
-
-        function showMessage(msg) {
-            const messageElement = document.getElementById('message');
-            messageElement.innerText = msg;
-            setTimeout(() => {
-                messageElement.innerText = '';
-            }, 3000);
         }
 
         function startMining() {
@@ -179,9 +175,9 @@
             document.getElementById('mineButton').disabled = true;
             document.getElementById('restButton').style.display = 'none';
 
-            miningInterval = setInterval(() => {
+            setInterval(() => {
                 if (energy > 0) {
-                    coins += coinsPerSecond * pickaxeLevel;
+                    coins += coinsPerHour / 3600; // Перевод в секунды
                     energy -= 1 / 216;
                     if (energy <= 0) {
                         energy = 0;
@@ -193,7 +189,6 @@
         }
 
         function stopMining() {
-            clearInterval(miningInterval);
             mining = false;
             document.getElementById('mineButton').disabled = false;
             if (energy < maxEnergy) {
@@ -207,21 +202,19 @@
                 return;
             }
 
-            restInterval = setInterval(() => {
+            setInterval(() => {
                 if (energy < maxEnergy) {
                     energy = Math.min(energy + 1 / 216, maxEnergy);
                     updateUI();
-                } else {
-                    clearInterval(restInterval);
-                    showMessage("Энергия полностью восстановлена!");
                 }
             }, 1000);
         }
 
-        function exchangeCoins() {
+        function exchangeCoinsForEmeralds() {
             if (coins >= 100) {
                 coins -= 100;
                 emeralds += 1;
+                showMessage("Обмен успешно выполнен!");
                 updateUI();
             } else {
                 showMessage("Недостаточно монет для обмена на изумруды!");
@@ -229,9 +222,11 @@
         }
 
         function upgradePickaxe() {
-            if (coins >= 100) {
-                coins -= 100;
-                pickaxeLevel++;
+            if (coins >= pickaxeUpgradeCost) {
+                coins -= pickaxeUpgradeCost;
+                pickaxeLevel += 1;
+                pickaxeUpgradeCost *= 2; // Удвоение стоимости
+                coinsPerHour *= 1.5; // Увеличение добычи
                 showMessage("Кирка улучшена до уровня " + pickaxeLevel);
                 updateUI();
             } else {
@@ -247,6 +242,14 @@
         function closeStore() {
             document.getElementById('modalOverlay').style.display = 'none';
             document.getElementById('store').style.display = 'none';
+        }
+
+        function showMessage(msg) {
+            const messageElement = document.getElementById('message');
+            messageElement.innerText = msg;
+            setTimeout(() => {
+                messageElement.innerText = '';
+            }, 3000);
         }
 
         window.onload = function() {
