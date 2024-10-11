@@ -6,149 +6,107 @@
     <title>Gnome Miner</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             background-image: url('background.jpg');
             background-size: cover;
+            color: white;
             margin: 0;
             padding: 20px;
             text-align: center;
-            color: white;
         }
-
         .container {
-            background-color: rgba(34, 34, 34, 0.8); /* Темно-серая прозрачная подложка */
-            border-radius: 10px;
+            background-color: rgba(40, 40, 40, 0.9);
             padding: 20px;
-            margin: 20px auto;
+            border-radius: 10px;
             width: 90%;
             max-width: 600px;
+            margin: 20px auto;
         }
-
+        .gnome {
+            margin-bottom: 20px;
+        }
         .energy-bar {
             width: 100%;
             height: 30px;
-            background-color: rgba(80, 80, 80, 0.5); /* Полупрозрачный темно-серый */
+            background-color: #444;
             margin-bottom: 10px;
             border-radius: 10px;
             position: relative;
-            text-align: center;
         }
-
         .energy-bar-inner {
             height: 100%;
-            background-color: #4caf50;
+            background-color: #76b852;
             border-radius: 10px;
             transition: width 0.5s ease;
-            position: absolute;
-            top: 0;
-            left: 0;
         }
-
-        .energy-bar-text {
-            position: relative;
-            z-index: 1;
-            font-weight: bold;
-            color: white;
-        }
-
         .stats {
             margin-bottom: 20px;
         }
-
-        .header {
-            font-size: 20px;
+        #coins, #emeralds {
+            font-size: 24px;
             font-weight: bold;
-            color: white;
-            margin-bottom: 10px;
         }
-
-        .modal {
+        #message {
+            color: red;
+            margin-top: 10px;
+        }
+        .popup {
             display: none;
             position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.7); /* Темный полупрозрачный фон для модала */
-        }
-
-        .modal-content {
-            background-color: rgba(34, 34, 34, 0.9); /* Темно-серая прозрачная подложка модального окна */
+            background-color: rgba(40, 40, 40, 0.95);
             color: white;
-            margin: 15% auto;
+            width: 300px;
             padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 400px;
-            text-align: center;
             border-radius: 10px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
-
-        .close {
-            color: white;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
+        .popup h2 {
+            margin: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ccc;
         }
-
-        .close:hover,
-        .close:focus {
-            color: #ccc;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 16px;
-            background-color: #555; /* Темно-серый */
+        .popup button {
+            background-color: #555;
             color: white;
             border: none;
-            border-radius: 5px;
+            padding: 10px 20px;
+            margin-top: 20px;
             cursor: pointer;
         }
-
-        button:hover {
-            background-color: #444; /* Еще более темный при наведении */
+        .popup button:hover {
+            background-color: #777;
         }
-
-        button.disabled {
-            background-color: #777; /* Бледно-серый, если кнопка неактивна */
-            cursor: not-allowed;
+        #restButton, #mineButton {
+            margin: 10px 5px;
         }
-
     </style>
 </head>
 <body>
-    <div class="header">
-        Монеты: <span id="coins">0.00</span> / Изумруды: <span id="emeralds">0</span>
-    </div>
     <div class="container">
+        <div class="stats">
+            <h3>Монеты: <span id="coins">0.00</span> / Изумруды: <span id="emeralds">0</span></h3>
+            <h4>Энергия: <span id="energy">100.00</span>/100.00</h4>
+        </div>
         <div class="gnome">
             <img src="gnome.png" alt="Гном" width="200">
         </div>
         <div class="energy-bar">
             <div class="energy-bar-inner" id="energy-bar"></div>
-            <div class="energy-bar-text" id="energy-text">100.00/100</div>
         </div>
         <button id="mineButton" onclick="startMining()">Майнить золото</button>
-        <button id="restButton" onclick="rest()">Отдых</button>
-        <button onclick="openModal()">Хранилище</button>
+        <button id="restButton" style="display:none;" onclick="rest()">Отдых</button>
+        <div id="message"></div>
     </div>
 
-    <!-- Modal хранилища -->
-    <div id="storageModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Хранилище</h2>
-            <p>Монеты: <span id="modalCoins">0.00</span> / Изумруды: <span id="modalEmeralds">0</span></p>
-            <button onclick="exchangeCoinsForEmeralds()">Обменять 100 монет на 1 изумруд</button>
-            <button onclick="upgradePickaxe()">Улучшить кирку (500 монет)</button>
-            <p id="storageMessage" style="color: red;"></p>
-        </div>
+    <!-- Popup Хранилище -->
+    <div class="popup" id="storagePopup">
+        <h2>Хранилище</h2>
+        <button onclick="exchangeCoinsForEmeralds()">Обменять 100 монет на 1 изумруд</button><br>
+        <button onclick="upgradePickaxe()">Улучшить кирку (100 изумрудов)</button>
+        <div id="storageMessage"></div>
+        <button onclick="closePopup()">Закрыть</button>
     </div>
 
     <script>
@@ -156,64 +114,79 @@
         let emeralds = 0;
         let energy = 100.00;
         let mining = false;
-        const maxEnergy = 100;
-        let pickaxeLevel = 1;
-        let miningInterval;
-        let coinIncrement = 1 / (216); // 1 монета за 216 секунд
-        let energyDecrement = 1 / (216); // Энергия уходит постепенно
+        const maxEnergy = 100.00;
+        let miningInterval = null;
+        let restInterval = null;
 
         function updateUI() {
             document.getElementById('coins').innerText = coins.toFixed(2);
             document.getElementById('emeralds').innerText = emeralds;
-            document.getElementById('modalCoins').innerText = coins.toFixed(2);
-            document.getElementById('modalEmeralds').innerText = emeralds;
-            document.getElementById('energy-bar').style.width = (energy / maxEnergy) * 100 + '%';
-            document.getElementById('energy-text').innerText = energy.toFixed(2) + '/' + maxEnergy;
+            document.getElementById('energy').innerText = energy.toFixed(2);
+            document.getElementById('energy-bar').style.width = (energy / maxEnergy * 100) + '%';
+        }
 
-            // Обновляем состояние кнопок
-            document.getElementById('mineButton').disabled = mining || energy <= 0;
-            document.getElementById('restButton').disabled = mining || energy >= maxEnergy;
+        function showMessage(msg) {
+            const messageElement = document.getElementById('message');
+            messageElement.innerText = msg;
+            setTimeout(() => {
+                messageElement.innerText = '';
+            }, 3000);
         }
 
         function startMining() {
             if (mining || energy <= 0) {
+                showMessage("Недостаточно энергии для майнинга!");
                 return;
             }
             mining = true;
-            updateUI();
+            document.getElementById('mineButton').disabled = true;
+            document.getElementById('restButton').style.display = 'none';
 
             miningInterval = setInterval(() => {
                 if (energy > 0) {
-                    coins += coinIncrement * pickaxeLevel; // Монеты с учётом уровня кирки
-                    energy -= energyDecrement; // Энергия уменьшается постепенно
-
+                    coins += 0.0046296296296296; // Каждые 216 секунд добавляется 1 монета
+                    energy -= 0.0046296296296296; // Каждые 216 секунд теряется 1 энергия
                     if (energy <= 0) {
                         energy = 0;
                         stopMining();
                     }
                     updateUI();
                 }
-            }, 1000); // Обновляем каждую секунду
+            }, 1000);
         }
 
         function stopMining() {
             clearInterval(miningInterval);
             mining = false;
-            updateUI();
+            document.getElementById('mineButton').disabled = false;
+            if (energy < maxEnergy) {
+                document.getElementById('restButton').style.display = 'block';
+            }
         }
 
         function rest() {
-            if (mining || energy >= maxEnergy) {
+            if (restInterval) {
                 return;
             }
-            const restInterval = setInterval(() => {
+
+            restInterval = setInterval(() => {
                 if (energy < maxEnergy) {
-                    energy += energyDecrement; // Восстанавливаем энергию постепенно
+                    energy = Math.min(energy + 0.0046296296296296, maxEnergy); // Восстановление 1 энергии каждые 216 секунд
                     updateUI();
                 } else {
                     clearInterval(restInterval);
+                    restInterval = null;
+                    showMessage("Энергия полностью восстановлена!");
                 }
-            }, 1000); // Обновление каждую секунду
+            }, 1000);
+        }
+
+        function openStorage() {
+            document.getElementById('storagePopup').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('storagePopup').style.display = 'none';
         }
 
         function exchangeCoinsForEmeralds() {
@@ -221,44 +194,48 @@
                 coins -= 100;
                 emeralds += 1;
                 updateUI();
+                showMessage("Обмен успешно выполнен!");
             } else {
-                document.getElementById('storageMessage').innerText = "Недостаточно монет для обмена.";
+                showStorageMessage("Недостаточно монет для обмена!");
             }
         }
 
         function upgradePickaxe() {
-            if (coins >= 500) {
-                coins -= 500;
-                pickaxeLevel += 1;
+            if (emeralds >= 100) {
+                emeralds -= 100;
                 updateUI();
+                showMessage("Кирка успешно улучшена!");
             } else {
-                document.getElementById('storageMessage').innerText = "Недостаточно монет для улучшения.";
+                showStorageMessage("Недостаточно изумрудов для улучшения кирки!");
             }
         }
 
-        function openModal() {
-            document.getElementById('storageModal').style.display = 'block';
+        function showStorageMessage(msg) {
+            const storageMessage = document.getElementById('storageMessage');
+            storageMessage.innerText = msg;
+            setTimeout(() => {
+                storageMessage.innerText = '';
+            }, 3000);
         }
 
-        function closeModal() {
-            document.getElementById('storageModal').style.display = 'none';
+        // Сохранение данных в localStorage
+        function saveUserData() {
+            localStorage.setItem('coins', coins.toFixed(2));
+            localStorage.setItem('emeralds', emeralds);
+            localStorage.setItem('energy', energy.toFixed(2));
+        }
+
+        // Загрузка данных из localStorage
+        function loadUserData() {
+            coins = parseFloat(localStorage.getItem('coins')) || 0.00;
+            emeralds = parseInt(localStorage.getItem('emeralds')) || 0;
+            energy = parseFloat(localStorage.getItem('energy')) || 100.00;
+            updateUI();
         }
 
         window.onload = function() {
-            // Загружаем сохраненные данные
-            coins = parseFloat(localStorage.getItem('coins')) || 0.00;
-            emeralds = parseInt(localStorage.getItem('emeralds')) || 0;
-            energy = parseFloat(localStorage.getItem('energy')) || 100;
-            pickaxeLevel = parseInt(localStorage.getItem('pickaxeLevel')) || 1;
-            updateUI();
-        };
-
-        window.onbeforeunload = function() {
-            // Сохраняем данные перед выходом
-            localStorage.setItem('coins', coins);
-            localStorage.setItem('emeralds', emeralds);
-            localStorage.setItem('energy', energy);
-            localStorage.setItem('pickaxeLevel', pickaxeLevel);
+            loadUserData();
+            setInterval(saveUserData, 60000); // Сохраняем данные каждые 60 секунд
         };
     </script>
 </body>
