@@ -78,7 +78,7 @@
         .popup button:hover {
             background-color: #777;
         }
-        #restButton, #mineButton {
+        #restButton, #mineButton, #upgradePickaxeButton, #exchangeButton {
             margin: 10px 5px;
         }
     </style>
@@ -97,14 +97,15 @@
         </div>
         <button id="mineButton" onclick="startMining()">Майнить золото</button>
         <button id="restButton" style="display:none;" onclick="rest()">Отдых</button>
+        <button id="storageButton" onclick="openStorage()">Хранилище</button>
         <div id="message"></div>
     </div>
 
     <!-- Popup Хранилище -->
     <div class="popup" id="storagePopup">
         <h2>Хранилище</h2>
-        <button onclick="exchangeCoinsForEmeralds()">Обменять 100 монет на 1 изумруд</button><br>
-        <button onclick="upgradePickaxe()">Улучшить кирку (100 изумрудов)</button>
+        <button id="exchangeButton" onclick="exchangeCoinsForEmeralds()">Обменять 100 монет на 1 изумруд</button><br>
+        <button id="upgradePickaxeButton" onclick="upgradePickaxe()">Улучшить кирку (100 изумрудов)</button>
         <div id="storageMessage"></div>
         <button onclick="closePopup()">Закрыть</button>
     </div>
