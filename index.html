@@ -12,9 +12,13 @@
             margin: 0;
             padding: 20px;
             text-align: center;
+            color: white;
         }
 
         .container {
+            background-color: rgba(34, 34, 34, 0.8); /* Темно-серая прозрачная подложка */
+            border-radius: 10px;
+            padding: 20px;
             margin: 20px auto;
             width: 90%;
             max-width: 600px;
@@ -23,7 +27,7 @@
         .energy-bar {
             width: 100%;
             height: 30px;
-            background-color: #ddd;
+            background-color: rgba(80, 80, 80, 0.5); /* Полупрозрачный темно-серый */
             margin-bottom: 10px;
             border-radius: 10px;
             position: relative;
@@ -32,7 +36,6 @@
 
         .energy-bar-inner {
             height: 100%;
-            width: 100%;
             background-color: #4caf50;
             border-radius: 10px;
             transition: width 0.5s ease;
@@ -55,7 +58,7 @@
         .header {
             font-size: 20px;
             font-weight: bold;
-            color: #333;
+            color: white;
             margin-bottom: 10px;
         }
 
@@ -68,21 +71,23 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.7); /* Темный полупрозрачный фон для модала */
         }
 
         .modal-content {
-            background-color: #f4f4f4;
+            background-color: rgba(34, 34, 34, 0.9); /* Темно-серая прозрачная подложка модального окна */
+            color: white;
             margin: 15% auto;
             padding: 20px;
             border: 1px solid #888;
             width: 80%;
             max-width: 400px;
             text-align: center;
+            border-radius: 10px;
         }
 
         .close {
-            color: #aaa;
+            color: white;
             float: right;
             font-size: 28px;
             font-weight: bold;
@@ -90,7 +95,7 @@
 
         .close:hover,
         .close:focus {
-            color: black;
+            color: #ccc;
             text-decoration: none;
             cursor: pointer;
         }
@@ -99,10 +104,19 @@
             padding: 10px 20px;
             margin: 5px;
             font-size: 16px;
+            background-color: #555; /* Темно-серый */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
 
-        .disabled {
-            background-color: #ccc;
+        button:hover {
+            background-color: #444; /* Еще более темный при наведении */
+        }
+
+        button.disabled {
+            background-color: #777; /* Бледно-серый, если кнопка неактивна */
             cursor: not-allowed;
         }
 
