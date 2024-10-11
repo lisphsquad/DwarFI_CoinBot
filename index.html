@@ -33,7 +33,7 @@
             width: 100%;
             background-color: #4caf50;
             border-radius: 10px;
-            transition: width 0.5s ease; /* Добавлена плавная анимация */
+            transition: width 0.5s ease; /* Плавная анимация */
         }
         .stats {
             margin-bottom: 20px;
@@ -68,10 +68,9 @@
         <div id="message"></div>
     </div>
 
-    
     <script>
-        let coins = 0.00;
-        let energy = 100;
+        let coins = parseFloat(localStorage.getItem('coins')) || 0.00; // Загружаем данные из localStorage
+        let energy = parseFloat(localStorage.getItem('energy')) || 100; // Загружаем данные из localStorage
         let mining = false; // Чтобы не запустить несколько процессов майнинга
         let miningInterval = null; // Интервал для майнинга
         let restInterval = null; // Интервал для восстановления энергии
@@ -112,6 +111,7 @@
                         stopMining(); // Остановить майнинг, если энергия на нуле
                     }
                     updateUI();
+                    saveUserData(); // Сохраняем данные при каждом обновлении
                 }
             }, 1000); // 1 раз в секунду
         }
@@ -135,6 +135,7 @@
                 if (energy < maxEnergy) {
                     energy = Math.min(energy + 1 / 216, maxEnergy); // Восстанавливаем энергию
                     updateUI();
+                    saveUserData(); // Сохраняем данные при каждом обновлении
                 } else {
                     clearInterval(restInterval);
                     showMessage("Энергия полностью восстановлена!");
@@ -147,6 +148,7 @@
                 energy -= 1 / 216;
                 if (energy < 0) energy = 0;
                 updateUI();
+                saveUserData(); // Сохраняем данные при каждом обновлении
             }
         }
 
@@ -154,30 +156,23 @@
             if (energy < maxEnergy) {
                 energy = Math.min(energy + 1 / 216, maxEnergy);
                 updateUI();
+                saveUserData(); // Сохраняем данные при каждом обновлении
             }
         }
 
+        function saveUserData() {
+            localStorage.setItem('coins', coins); // Сохраняем монеты в localStorage
+            localStorage.setItem('energy', energy); // Сохраняем энергию в localStorage
+        }
+
         window.onload = function() {
+            // Обновление интерфейса
+            updateUI();
+
             // Энергия и восстановление
             setInterval(decreaseEnergy, 1000); // Уменьшаем энергию каждую секунду
             setInterval(restoreEnergy, 1000); // Восстанавливаем энергию каждую секунду
         };
-
-        function saveUserData() {
-            fetch('/save_user_data', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ coins: coins, energy: energy }),
-            })
-            .then(response => response.json())
-            .then(data => console.log('Data saved:', data))
-            .catch(error => console.error('Error saving data:', error)); // Обработка ошибок
-        }
-
-        // Сохраняем данные каждые 60 секунд
-        setInterval(saveUserData, 60000);
     </script>
 </body>
 </html>
