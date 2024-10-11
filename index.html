@@ -132,7 +132,7 @@
         </div>
         <div class="energy-bar">
             <div class="energy-bar-inner" id="energy-bar"></div>
-            <div class="energy-bar-text" id="energy-text">100/100</div>
+            <div class="energy-bar-text" id="energy-text">100.00/100</div>
         </div>
         <button id="mineButton" onclick="startMining()">Майнить золото</button>
         <button id="restButton" onclick="rest()">Отдых</button>
@@ -154,11 +154,13 @@
     <script>
         let coins = 0.00;
         let emeralds = 0;
-        let energy = 100;
+        let energy = 100.00;
         let mining = false;
         const maxEnergy = 100;
         let pickaxeLevel = 1;
         let miningInterval;
+        let coinIncrement = 1 / (216); // 1 монета за 216 секунд
+        let energyDecrement = 1 / (216); // Энергия уходит постепенно
 
         function updateUI() {
             document.getElementById('coins').innerText = coins.toFixed(2);
@@ -166,7 +168,7 @@
             document.getElementById('modalCoins').innerText = coins.toFixed(2);
             document.getElementById('modalEmeralds').innerText = emeralds;
             document.getElementById('energy-bar').style.width = (energy / maxEnergy) * 100 + '%';
-            document.getElementById('energy-text').innerText = Math.floor(energy) + '/' + maxEnergy;
+            document.getElementById('energy-text').innerText = energy.toFixed(2) + '/' + maxEnergy;
 
             // Обновляем состояние кнопок
             document.getElementById('mineButton').disabled = mining || energy <= 0;
@@ -182,17 +184,16 @@
 
             miningInterval = setInterval(() => {
                 if (energy > 0) {
-                    coins += 1 * pickaxeLevel; // 1 монета за 216 секунд
-                    energy -= 1; // 1 единица энергии за 216 секунд
-
-                    updateUI();
+                    coins += coinIncrement * pickaxeLevel; // Монеты с учётом уровня кирки
+                    energy -= energyDecrement; // Энергия уменьшается постепенно
 
                     if (energy <= 0) {
                         energy = 0;
                         stopMining();
                     }
+                    updateUI();
                 }
-            }, 216000); // 216 секунд = 1 единица энергии
+            }, 1000); // Обновляем каждую секунду
         }
 
         function stopMining() {
@@ -207,12 +208,12 @@
             }
             const restInterval = setInterval(() => {
                 if (energy < maxEnergy) {
-                    energy += 1;
+                    energy += energyDecrement; // Восстанавливаем энергию постепенно
                     updateUI();
                 } else {
                     clearInterval(restInterval);
                 }
-            }, 216000); // Восстановление 1 единицы энергии за 216 секунд
+            }, 1000); // Обновление каждую секунду
         }
 
         function exchangeCoinsForEmeralds() {
