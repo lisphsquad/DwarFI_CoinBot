@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gnome Miner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+        }
+        .gnome {
+            margin-bottom: 20px;
+        }
+        .energy-bar {
+            width: 100%;
+            height: 30px;
+            background-color: #ddd;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            position: relative;
+        }
+        .energy-bar-inner {
+            height: 100%;
+            width: 100%;
+            background-color: #4caf50;
+            border-radius: 10px;
+            transition: width 0.5s ease; /* Добавлена плавная анимация */
+        }
+        .stats {
+            margin-bottom: 20px;
+        }
+        #coins {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #message {
+            color: red;
+            margin-top: 10px;
+        }
+        #restButton {
+            display: none; /* Скрыть кнопку отдыха по умолчанию */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="gnome">
+            <img src="gnome.png" alt="Гном" width="200">
+        </div>
+        <div class="energy-bar">
+            <div class="energy-bar-inner" id="energy-bar"></div>
+        </div>
+        <div class="stats">
+            <h3>Монеты: <span id="coins">0.00</span></h3>
+            <h4>Энергия: <span id="energy">100</span>/100</h4>
+        </div>
+        <button id="mineButton" onclick="startMining()">Майнить золото</button>
+        <button id="restButton" onclick="rest()">Отдых</button>
+        <div id="message"></div>
+    </div>
+
+    
+    <script>
+        let coins = 0.00;
+        let energy = 100;
+        let mining = false; // Чтобы не запустить несколько процессов майнинга
+        let miningInterval = null; // Интервал для майнинга
+        let restInterval = null; // Интервал для восстановления энергии
+        const maxEnergy = 100;
+
+        function updateUI() {
+            document.getElementById('coins').innerText = coins.toFixed(2);
+            document.getElementById('energy').innerText = Math.floor(energy);
+            document.getElementById('energy-bar').style.width = energy + '%';
+            document.getElementById('mineButton').disabled = energy <= 0; // Отключить кнопку если нет энергии
+            document.getElementById('restButton').disabled = energy >= maxEnergy; // Отключить отдых если энергия полная
+        }
+
+        function showMessage(msg) {
+            const messageElement = document.getElementById('message');
+            messageElement.innerText = msg;
+            setTimeout(() => {
+                messageElement.innerText = '';
+            }, 3000); // Сообщение исчезает через 3 секунды
+        }
+
+        function startMining() {
+            if (mining || energy <= 0) {
+                showMessage("Недостаточно энергии для майнинга!");
+                return;
+            }
+
+            mining = true;
+            document.getElementById('mineButton').disabled = true;
+            document.getElementById('restButton').style.display = 'none';
+
+            miningInterval = setInterval(() => {
+                if (energy > 0) {
+                    coins += 0.0046296296296296; // Добавляем монеты каждый раз
+                    energy -= 1 / 216; // Уменьшаем энергию равномерно
+                    if (energy <= 0) {
+                        energy = 0;
+                        stopMining(); // Остановить майнинг, если энергия на нуле
+                    }
+                    updateUI();
+                }
+            }, 1000); // 1 раз в секунду
+        }
+
+        function stopMining() {
+            clearInterval(miningInterval); // Остановить интервал
+            mining = false;
+            document.getElementById('mineButton').disabled = false;
+            if (energy < maxEnergy) {
+                document.getElementById('restButton').style.display = 'block'; // Показать кнопку отдыха если энергия не полная
+            }
+        }
+
+        function rest() {
+            if (energy >= maxEnergy) {
+                showMessage("Энергия уже полная!");
+                return; // Ничего не делаем если энергия уже полная
+            }
+
+            restInterval = setInterval(() => {
+                if (energy < maxEnergy) {
+                    energy = Math.min(energy + 1 / 216, maxEnergy); // Восстанавливаем энергию
+                    updateUI();
+                } else {
+                    clearInterval(restInterval);
+                    showMessage("Энергия полностью восстановлена!");
+                }
+            }, 1000); // Восстановление энергии каждую секунду
+        }
+
+        function decreaseEnergy() {
+            if (energy > 0) {
+                energy -= 1 / 216;
+                if (energy < 0) energy = 0;
+                updateUI();
+            }
+        }
+
+        function restoreEnergy() {
+            if (energy < maxEnergy) {
+                energy = Math.min(energy + 1 / 216, maxEnergy);
+                updateUI();
+            }
+        }
+
+        window.onload = function() {
+            // Энергия и восстановление
+            setInterval(decreaseEnergy, 1000); // Уменьшаем энергию каждую секунду
+            setInterval(restoreEnergy, 1000); // Восстанавливаем энергию каждую секунду
+        };
+
+        function saveUserData() {
+            fetch('/save_user_data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ coins: coins, energy: energy }),
+            })
+            .then(response => response.json())
+            .then(data => console.log('Data saved:', data))
+            .catch(error => console.error('Error saving data:', error)); // Обработка ошибок
+        }
+
+        // Сохраняем данные каждые 60 секунд
+        setInterval(saveUserData, 60000);
+    </script>
+</body>
+</html>
